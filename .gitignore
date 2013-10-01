@@ -1,0 +1,12 @@
+.Rproj.user
+.Rhistory
+.RData
+*.html
+
+# Not necessary to present
+data.R
+main.R
+requirements.R
+
+# Presentation folder
+Presentation/
