@@ -8,5 +8,7 @@ data.R
 main.R
 requirements.R
 
-# Presentation folder
-Presentation/
+# Ignore certain Presentation Files
+Presentation/*-cache
+Presentation/*-figure
+!Presentation/*.html

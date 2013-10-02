@@ -1,0 +1,214 @@
+R: Not just for pirates (anymore)
+========================================================
+author: Joshua Guy Lenes
+date: 1 October 2013
+font-import: http://fonts.googleapis.com/css?family=PT+Sans
+font-family: "PT Sans"
+transition: rotate
+
+```{r,echo=FALSE}
+load("workspace.RData")
+```
+
+Okay, but really. Why R?
+========================================================
+incremental: true
+
+- It's **Free** (as in beer, and in speech)
+- It has an incredible **package** repository
+- It's a real, all-grown-up, modern, **object-oriented**, high-level computer language.
+
+It's Free
+========================================================
+type: sub-section
+
+## Really, actually, completely *free*.
+
+- No license renewal periods (*Nighmares!*)
+- No upgrade fees
+- No cost for additional features (`install.packages`)
+- Awesome and free ***development*** tools
+
+Josh, your development environment is so slick
+========================================================
+incremental: true
+
+**Thanks, Bro.**
+
+You can have a slick development environment, too.
+
+Sweetness. What do I do?
+========================================================
+incremental: true
+
+* Download `R` (duh): [http://cran.r-project.org/](http://cran.r-project.org/), then:
+* Download `RStudio` (duh): [http://www.rstudio.com/](http://www.rstudio.com/)
+
+## What's the difference?
+
+* **R** is just a library. It has all of the files your computer needs to *understand* and execute R code
+* **RStudio** is an IDE (Integrated Development Environment) that helps you write code in R more easily
+
+Packages Kick Ass
+========================================================
+incremental: true
+type: sub-section
+
+* There are over **5000** are available on `CRAN` (Comprehensive R Archive Network)
+* Developed and maintained by super-smart people who are not me.  
+* Some examples:
+  * `lme4`: Multilevel modeling
+  * `metafor`: Meta-analysis
+  * `lavaan`: Latent variable analysis (SEM)
+
+It's Object-Oriented
+========================================================
+transition: rotate
+type: sub-section
+
+## Wait, WTF does object-oriented mean?
+
+Everything in R is an *object*, which is an instance of a *class*. Even variables are objects.
+
+**Objects** have:
+* Properties
+* Methods  
+
+Demo
+========================================================
+
+## Grab the demo files:
+<span style="text-align: center">**[https://github.com/jglenes/rug-demo](https://github.com/jglenes/rug-demo)**</span>
+
+
+Classroom Data
+========================================================
+incremental: true
+
+```{r,eval=FALSE}
+# Interpreting SPSS Files
+install.packages("foreign")
+library("foreign")
+```
+
+```{r,eval=FALSE}
+# Reading the data to a data.frame R object
+firstday.data <- read.spss(
+  file="SOP4004.Questionnaire.sav",
+  use.value.labels=T,
+  to.data.frame=T # We want this
+)
+```
+
+Classroom Data
+========================================================
+incremental: true
+
+What are our variables called?
+
+```{r}
+names(firstday.data)
+```
+
+In *RStudio* you can use `View(firstday.data)`
+
+Classroom Data
+========================================================
+incremental: true
+
+1. If Josh were to give you $500 to stand in front of the class in your underwear, would you do it?
+2. Estimate the percentage of your peers who would agree to stand in front of the class in their underwear
+
+```{r}
+head(firstday.data[2:3]) # That's our data.frame object, being called by head()
+```
+
+Classroom Data
+========================================================
+incremental: true
+type: prompt
+
+Instead of calling it like this:
+
+`head(firstday.data[2:3])`
+
+I could have just as easily done this:
+
+`head(firstday.data[,c("Underwear","PercentageUnderwear")])`
+
+Or this:
+
+`firstday.data[1:5,c("Underwear","PercentageUnderwear")]`
+
+ANOV(ugh)
+========================================================
+incremental: true
+type: sub-section
+
+```{r}
+underwear.aov <- aov(PercentageUnderwear ~ Underwear,data=firstday.data)
+```
+
+```{r}
+summary(underwear.aov)
+```
+
+ANOV(ugh): Summary Table of Means
+========================================================
+incremental: true
+type: sub-section
+
+```{r}
+library(plyr)
+
+# Make a new dataframe with means
+firstday.data.summary <- ddply(na.omit(firstday.data), .(Underwear), summarize,
+      N = sum(!is.na(PercentageUnderwear)),
+      mean = mean(PercentageUnderwear),
+      sd = sd(PercentageUnderwear),
+      se = sd/sqrt(N)
+)
+```
+
+ANOV(ugh): Summary Table of Means
+========================================================
+incremental: true
+type: sub-section
+
+```{r}
+head(firstday.data.summary)
+```
+
+ANOV(ugh): Plot
+========================================================
+incremental: false
+
+```{r}
+library(ggplot2)
+```
+------
+
+```{r,echo=FALSE,figs.only=TRUE,fig.width=35,fig.height=40,cache=T}
+ggplot(firstday.data.summary, aes(x=factor(firstday.data.summary$Underwear), y=mean, fill=factor(firstday.data.summary$Underwear))) +
+    geom_bar(stat="identity") +
+    geom_errorbar(
+      aes(ymin=mean-se, ymax=mean+se),
+      width=.1,                    # Width of the error bars
+      position=position_dodge(.9)
+    ) +
+    labs(
+      title="Estimate the percentage of your peers who would\n agree to stand in front of the class in their underwear\n"
+    ) +
+    guides(fill=F) +
+    scale_x_discrete(name="\nIf Josh were to give you $500 to stand in front of\n the class in your underwear, would you do it?",breaks=c("Yes","No"),labels=c("Yes","No")) +
+    scale_y_continuous(name="Mean percentage of peers who would stand in their underwear\n") +
+    scale_fill_hue() +
+    theme_bw() +
+    theme(
+      plot.title = element_text(size=80),
+      axis.title.x = element_text(size=80),
+      axis.title.y = element_text(size=80),
+      axis.text.x = element_text(size=70),
+      axis.text.y = element_text(size=70)
+    )
+```
